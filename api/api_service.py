@@ -36,7 +36,7 @@ else:
     logging.getLogger("requests").setLevel(logging.WARNING)
 
 redisService = getService('REDIS_SERVICE')
-redis = redis.Redis(
+redis = Redis(
     host=os.environ.get('HOST', 'redis'),
     port=os.environ.get('PORT', 6379),
     password=os.environ.get('REDIS_PASSWORD')
