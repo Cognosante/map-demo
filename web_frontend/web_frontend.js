@@ -2,9 +2,11 @@ var express = require('express');
 var app = express();
 var redis = require('redis');
 
-var redistPort = process.env.REDIS_SERVICE_PORT || 6379;
-var redisHost = process.env.REDIS_SERVICE_HOST || 'redis';
 var appPort = process.env.APP_PORT || 8080;
+
+var redisName = process.env.REDIS_SERVICE || 'REDIS';
+var redistPort = process.env[redisName + '_SERVICE_PORT'] || 6379;
+var redisHost = process.env[redisName + '_SERVICE_HOST'] || 'redis';
 
 var client = redis.createClient(redistPort, redisHost);
 client.on('error', function(err) {
