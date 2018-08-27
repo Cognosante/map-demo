@@ -2,7 +2,7 @@
 # 1. sudo docker build -t rng:latest .
 # 2. sudo docker run -p 5000:80 rng
 # 3. curl localhost:5000/32 returns random octets
-# 
+#
 
 from flask import Flask, Response
 import os
@@ -15,6 +15,7 @@ hostname = socket.gethostname()
 
 # get urandom
 urandom = os.open("/dev/urandom", os.O_RDONLY)
+
 
 @app.route("/")
 def index():
@@ -31,4 +32,5 @@ def rng(how_many_bytes):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
+    port = os.environ['APP_PORT'] if 'APP_PORT' in os.environ else 80
+    app.run(host="0.0.0.0", port=port)
