@@ -2,7 +2,11 @@ var express = require('express');
 var app = express();
 var redis = require('redis');
 
-var client = redis.createClient(6379, 'redis');
+var redistPort = process.env.REDIS_SERVICE_PORT || 6379;
+var redisHost = process.env.REDIS_SERVICE_HOST || 'redis';
+var appPort = process.env.APP_PORT || 8080;
+
+var client = redis.createClient(redistPort, redisHost);
 client.on('error', function(err) {
   console.error('Redis error', err);
 });
@@ -26,8 +30,8 @@ app.get('/json', function(req, res) {
 
 app.use(express.static('public'));
 
-var server = app.listen(process.env.APP_PORT || 80, function() {
-  console.log('web_frontend running on port 80');
+var server = app.listen(appPort, function() {
+  console.log('web_frontend running on port ' + appPort);
 });
 
 module.exports = server;
