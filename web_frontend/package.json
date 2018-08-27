@@ -18,7 +18,9 @@
     "sinon": "^6.1.3"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build": "mocha",
+    "start": "node web_frontend.js"
   },
   "repository": {
     "type": "git",
