@@ -10,7 +10,7 @@ import time
 DEBUG = os.environ.get("DEBUG", "").lower().startswith("y")
 
 
-def serviceName(serviceName):
+def getService(serviceName):
     name = os.environ.get(serviceName).upper()
     service = {
         'NAME': name,
