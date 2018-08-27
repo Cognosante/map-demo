@@ -4,7 +4,7 @@ var redis = require('redis');
 
 var appPort = process.env.APP_PORT || 8080;
 
-var redisName = process.env.REDIS_SERVICE || 'REDIS';
+var redisName = (process.env.REDIS_SERVICE || 'REDIS').toUpperCase();
 var redistPort = process.env[redisName + '_SERVICE_PORT'] || 6379;
 var redisHost = process.env[redisName + '_SERVICE_HOST'] || 'redis';
 
