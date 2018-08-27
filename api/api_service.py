@@ -33,7 +33,7 @@ else:
 
 redisService = getService('REDIS_SERVICE')
 redis = Redis(
-    host=os.environ.get('HOST', 'redis'),
+    host=os.environ.get('NAME', 'redis'),
     port=os.environ.get('PORT', 6379),
     password=os.environ.get('REDIS_PASSWORD')
 )
