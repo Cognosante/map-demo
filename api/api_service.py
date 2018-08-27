@@ -11,6 +11,9 @@ DEBUG = os.environ.get("DEBUG", "").lower().startswith("y")
 
 
 def getService(serviceName):
+    for x in os.environ:
+        print(x, '=', os.environ[x])
+
     name = serviceName.upper
     service = {
         'NAME': name,
