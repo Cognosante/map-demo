@@ -9,6 +9,9 @@ var redistPort = process.env[redisName + '_SERVICE_PORT'] || 6379;
 var redisHost = process.env[redisName + '_SERVICE_HOST'] || 'redis';
 
 var client = redis.createClient(redistPort, redisHost);
+if (process.env.REDIS_PASSWORD) {
+  client.auth(process.env.REDIS_PASSWORD);
+}
 client.on('error', function(err) {
   console.error('Redis error', err);
 });
