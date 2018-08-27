@@ -10,25 +10,18 @@ import time
 DEBUG = os.environ.get("DEBUG", "").lower().startswith("y")
 
 
-def getService(serviceName):
-    # for x in os.environ:
-    #     print(x, '=', os.environ[x])
+def serviceName(serviceName):
     name = os.environ.get(serviceName).upper()
-    print("=======> {}_SERVICE_HOST".format(name))
     service = {
         'NAME': name,
         'HOST': os.environ.get("{}_SERVICE_HOST".format(name)),
         'PORT': os.environ.get("{}_SERVICE_PORT".format(name)),
     }
     if 'PORT' in service:
-        service['URL'] = 'http://{}'.format(name)
-    else:
         service['URL'] = 'http://{}:{}'.format(name, service['PORT'])
-
-    print('Service: ', name)
-    for x in service:
-        print(x, ':', service[x])
-    return service
+    else:
+        service['URL'] = 'http://{}'.format(name)
+    return name
 
 
 log = logging.getLogger(__name__)
