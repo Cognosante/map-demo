@@ -15,6 +15,7 @@ def getService(serviceName):
         print(x, '=', os.environ[x])
 
     name = serviceName.upper
+    print('=======>', os.environ.get("{}_SERVICE_HOST".format(name)))
     service = {
         'NAME': name,
         'HOST': os.environ.get("{}_SERVICE_HOST".format(name)),
