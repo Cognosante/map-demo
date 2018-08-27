@@ -21,9 +21,9 @@ def getService(serviceName):
         'PORT': os.environ.get("{}_SERVICE_PORT".format(name)),
     }
     if 'PORT' in service:
-        service['URL'] = 'http://{}'.format(service['HOST'])
+        service['URL'] = 'http://{}'.format(service['NAME'])
     else:
-        service['URL'] = 'http://{}:{}'.format(service['HOST'], service['PORT'])
+        service['URL'] = 'http://{}:{}'.format(service['NAME'], service['PORT'])
 
     print('Service: ', name)
     for x in service:
