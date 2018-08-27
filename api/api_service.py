@@ -13,9 +13,9 @@ DEBUG = os.environ.get("DEBUG", "").lower().startswith("y")
 def getService(serviceName):
     name = serviceName.upper
     service = {
-        NAME: name,
-        HOST: os.environ.get("{}_SERVICE_HOST".format(name)),
-        PORT: os.environ.get("{}_SERVICE_PORT".format(name)),
+        'NAME': name,
+        'HOST': os.environ.get("{}_SERVICE_HOST".format(name)),
+        'PORT': os.environ.get("{}_SERVICE_PORT".format(name)),
     }
     if 'PORT' in service:
         service['URL'] = 'http://{}'.format(service['HOST'])
