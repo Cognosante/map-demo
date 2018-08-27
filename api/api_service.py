@@ -21,7 +21,7 @@ def getService(serviceName):
         service['URL'] = 'http://{}:{}'.format(name, service['PORT'])
     else:
         service['URL'] = 'http://{}'.format(name)
-    return name
+    return service
 
 
 log = logging.getLogger(__name__)
