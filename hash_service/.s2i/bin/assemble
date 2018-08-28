@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eo pipefail
+# Set environment variables.
+export CI=true
+export DEV_MODE=true
+# Execute original assemble script.
+/usr/libexec/s2i/assemble
+# Run additional build steps.
+echo "Running unit tests ..."

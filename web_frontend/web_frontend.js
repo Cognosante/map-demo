@@ -6,7 +6,7 @@ var appPort = process.env.APP_PORT || 8080;
 
 var redisName = (process.env.REDIS_SERVICE || 'REDIS').toUpperCase();
 var redistPort = process.env[redisName + '_SERVICE_PORT'] || 6379;
-var redisHost = process.env[redisName + '_SERVICE_HOST'] || 'redis';
+var redisHost = redisName || 'redis';
 
 var client = redis.createClient(redistPort, redisHost);
 if (process.env.REDIS_PASSWORD) {
