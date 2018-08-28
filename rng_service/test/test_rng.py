@@ -9,10 +9,10 @@ class rngTests(unittest.TestCase):
         rng_service.app.testing = True
         self.app = rng_service.app.test_client()
 
-    def testHostName(self): 
+    def testHostName(self):
         hostname = socket.gethostname()
         response = self.app.get('/')
-        self.assertEqual(response.data, "rng_service running on {}\n".format(hostname))
+        self.assertEqual(response.data.decode("utf-8"), "rng_service running on {}\n".format(hostname))
 
     def testRandomBytes(self):
         num_bytes = 32
@@ -27,6 +27,7 @@ class rngTests(unittest.TestCase):
 
 def main():
     unittest.main()
+
 
 if __name__ == '__main__':
     main()
