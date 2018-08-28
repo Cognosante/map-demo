@@ -32,5 +32,4 @@ def rng(how_many_bytes):
 
 
 if __name__ == "__main__":
-    port = os.environ['APP_PORT'] if 'APP_PORT' in os.environ else 80
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=os.environ.get('APP_PORT', 8080))
