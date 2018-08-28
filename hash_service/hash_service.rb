@@ -8,7 +8,7 @@ require 'sinatra'
 require 'socket'
 
 set :bind, '0.0.0.0'
-set :port, ENV['APP_PORT'] || 80
+set :port, ENV['APP_PORT'] || 8080
 
 post '/' do
     sleep 0.1
