@@ -1,7 +1,8 @@
 #!/bin/bash
 set -eo pipefail
 # Set environment variables.
-cat /usr/libexec/s2i/assemble
+bundle install
+# cat /usr/libexec/s2i/assemble
 # Execute original assemble script.
 /usr/libexec/s2i/assemble
 # Run additional build steps.
