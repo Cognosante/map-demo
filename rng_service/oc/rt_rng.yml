@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+  creationTimestamp: null
+  name: rng
+spec:
+  host: rng.macmdemo.cognosante.cc
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: Service
+    name: rng
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: null

@@ -1,0 +1,38 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  creationTimestamp: null
+  name: rng
+  selfLink: /apis/build.openshift.io/v1/namespaces/macm/buildconfigs/rng
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: rng:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: /rng_service
+    git:
+      ref: master
+      uri: https://github.com/Cognosante/map-demo
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python:3.6
+        namespace: openshift
+    type: Source
+  successfulBuildsHistoryLimit: 5
+  triggers:
+    - imageChange:
+        lastTriggeredImageID: registry.access.redhat.com/rhscl/python-36-rhel7@sha256:6dc1d761d5f476d8d55102ace0a662fbce7c1d1d88660c39bbf6aefebc60cf53
+      type: ImageChange
+    - type: ConfigChange
+    - generic:
+        secret: ed8410395e7f387d
+      type: Generic

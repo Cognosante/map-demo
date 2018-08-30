@@ -1,0 +1,846 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: macmdemo
+parameters:
+  - name: DOMAIN
+    value: macmdemo.cognosante.cc
+    description: The domain base that is hosting the OC cluster project. It can contain subdomain specific to the namespace.
+objects:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: api
+      name: api
+    spec:
+      ports:
+        - name: 80-tcp
+          port: 80
+          protocol: TCP
+          targetPort: 80
+      selector:
+        deploymentconfig: api
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: frontend
+      name: frontend
+    spec:
+      ports:
+        - name: 8080-tcp
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        deploymentconfig: frontend
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: hash
+      name: hash
+    spec:
+      ports:
+        - name: 8080-tcp
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        deploymentconfig: hash
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        template.openshift.io/expose-uri: redis://{.spec.clusterIP}:{.spec.ports[?(.name=="redis")].port}
+      creationTimestamp: null
+      labels:
+        template: redis-persistent-template
+      name: redis
+      ownerReferences:
+        - apiVersion: template.openshift.io/v1
+          blockOwnerDeletion: false
+          kind: TemplateInstance
+          name: aac43012-f4d2-4d51-9eb1-d0c87239f412
+          uid: b4d2ebe8-aa01-11e8-997a-02f82f989fe8
+    spec:
+      ports:
+        - name: redis
+          port: 6379
+          protocol: TCP
+          targetPort: 6379
+      selector:
+        name: redis
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      name: rng
+    spec:
+      ports:
+        - name: 8080-tcp
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        deploymentconfig: rng
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 22
+      labels:
+        app: demo
+      name: api
+    spec:
+      replicas: 1
+      selector:
+        deploymentconfig: api
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: api
+            deploymentconfig: api
+        spec:
+          containers:
+            - env:
+                - name: APP_FILE
+                  value: api_service.py
+                - name: RNG_SERVICE
+                  value: rng
+                - name: HASH_SERVICE
+                  value: hash
+                - name: REDIS_SERVICE
+                  value: redis
+                - name: REDIS_PASSWORD
+                  value: C0gn0sant3
+              image: docker-registry.default.svc:5000/macm/api@sha256:05b8221109bcf2e3397aed4ca42e0776987f2f6d1bba7dbbabe35da7f28c3f0d
+              imagePullPolicy: Always
+              name: api
+              ports:
+                - containerPort: 80
+                  protocol: TCP
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+      test: false
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - api
+            from:
+              kind: ImageStreamTag
+              name: api:latest
+              namespace: macm
+            lastTriggeredImage: docker-registry.default.svc:5000/macm/api@sha256:05b8221109bcf2e3397aed4ca42e0776987f2f6d1bba7dbbabe35da7f28c3f0d
+          type: ImageChange
+        - type: ConfigChange
+    status:
+      availableReplicas: 0
+      latestVersion: 0
+      observedGeneration: 0
+      replicas: 0
+      unavailableReplicas: 0
+      updatedReplicas: 0
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 19
+      labels:
+        app: demo
+      name: frontend
+    spec:
+      replicas: 1
+      selector:
+        deploymentconfig: frontend
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: frontend
+            deploymentconfig: frontend
+        spec:
+          containers:
+            - env:
+                - name: NODE_ENV
+                  value: production
+                - name: REDIS_SERVICE
+                  value: redis
+                - name: REDIS_PASSWORD
+                  value: C0gn0sant3
+              image: docker-registry.default.svc:5000/macm/frontend@sha256:218c27ea0244c556eae92bbfba422e84815266d5a6feb4be531f8d66b12f562f
+              imagePullPolicy: Always
+              name: frontend
+              ports:
+                - containerPort: 80
+                  protocol: TCP
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+      test: false
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - frontend
+            from:
+              kind: ImageStreamTag
+              name: frontend:latest
+              namespace: macm
+            lastTriggeredImage: docker-registry.default.svc:5000/macm/frontend@sha256:218c27ea0244c556eae92bbfba422e84815266d5a6feb4be531f8d66b12f562f
+          type: ImageChange
+        - type: ConfigChange
+    status:
+      availableReplicas: 0
+      latestVersion: 0
+      observedGeneration: 0
+      replicas: 0
+      unavailableReplicas: 0
+      updatedReplicas: 0
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 10
+      labels:
+        app: demo
+      name: hash
+    spec:
+      replicas: 1
+      selector:
+        deploymentconfig: hash
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: hash
+            deploymentconfig: hash
+        spec:
+          containers:
+            - env:
+                - name: APP_PORT
+                  value: '8080'
+              image: docker-registry.default.svc:5000/macm/hash@sha256:ed3568b5c39430b47e320311b6d4e83ed04392fef1b6413e432c34aa12121d74
+              imagePullPolicy: Always
+              name: hash
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+      test: false
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - hash
+            from:
+              kind: ImageStreamTag
+              name: hash:latest
+              namespace: macm
+            lastTriggeredImage: docker-registry.default.svc:5000/macm/hash@sha256:ed3568b5c39430b47e320311b6d4e83ed04392fef1b6413e432c34aa12121d74
+          type: ImageChange
+        - type: ConfigChange
+    status:
+      availableReplicas: 0
+      latestVersion: 0
+      observedGeneration: 0
+      replicas: 0
+      unavailableReplicas: 0
+      updatedReplicas: 0
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      annotations:
+        template.alpha.openshift.io/wait-for-ready: 'true'
+      creationTimestamp: null
+      generation: 2
+      labels:
+        template: redis-persistent-template
+      name: redis
+      ownerReferences:
+        - apiVersion: template.openshift.io/v1
+          blockOwnerDeletion: false
+          kind: TemplateInstance
+          name: aac43012-f4d2-4d51-9eb1-d0c87239f412
+          uid: b4d2ebe8-aa01-11e8-997a-02f82f989fe8
+    spec:
+      replicas: 1
+      selector:
+        name: redis
+      strategy:
+        activeDeadlineSeconds: 21600
+        recreateParams:
+          timeoutSeconds: 600
+        resources: {}
+        type: Recreate
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            name: redis
+        spec:
+          containers:
+            - env:
+                - name: REDIS_PASSWORD
+                  value: C0gn0sant3
+              image: registry.access.redhat.com/rhscl/redis-32-rhel7@sha256:ebe4d9e9d1e0d50877ed724cf1febeddf7aed14dee4a9d560c4b24e1d090fdc9
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                failureThreshold: 3
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                successThreshold: 1
+                tcpSocket:
+                  port: 6379
+                timeoutSeconds: 1
+              name: redis
+              ports:
+                - containerPort: 6379
+                  protocol: TCP
+              readinessProbe:
+                exec:
+                  command:
+                    - /bin/sh
+                    - -i
+                    - -c
+                    - test "$(redis-cli -h 127.0.0.1 -a $REDIS_PASSWORD ping)" == "PONG"
+                failureThreshold: 3
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              resources:
+                limits:
+                  memory: 512Mi
+              securityContext:
+                capabilities: {}
+                privileged: false
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+                - mountPath: /var/lib/redis/data
+                  name: redis-data
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+          volumes:
+            - name: redis-data
+              persistentVolumeClaim:
+                claimName: redis
+      test: false
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - redis
+            from:
+              kind: ImageStreamTag
+              name: redis:3.2
+              namespace: openshift
+            lastTriggeredImage: registry.access.redhat.com/rhscl/redis-32-rhel7@sha256:ebe4d9e9d1e0d50877ed724cf1febeddf7aed14dee4a9d560c4b24e1d090fdc9
+          type: ImageChange
+        - type: ConfigChange
+    status:
+      availableReplicas: 0
+      latestVersion: 0
+      observedGeneration: 0
+      replicas: 0
+      unavailableReplicas: 0
+      updatedReplicas: 0
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 13
+      labels:
+        app: demo
+      name: rng
+    spec:
+      replicas: 1
+      selector:
+        deploymentconfig: rng
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            deploymentconfig: rng
+        spec:
+          containers:
+            - env:
+                - name: APP_FILE
+                  value: rng_service.py
+                - name: APP_PORT
+                  value: '8080'
+              image: docker-registry.default.svc:5000/macm/rng@sha256:0c773627011ef1ac2b6ab73c67c775c0c330bbad1c7cc27e73b34ecd5d24218c
+              imagePullPolicy: Always
+              name: rng
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+      test: false
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - rng
+            from:
+              kind: ImageStreamTag
+              name: rng:latest
+              namespace: macm
+            lastTriggeredImage: docker-registry.default.svc:5000/macm/rng@sha256:0c773627011ef1ac2b6ab73c67c775c0c330bbad1c7cc27e73b34ecd5d24218c
+          type: ImageChange
+        - type: ConfigChange
+    status:
+      availableReplicas: 0
+      latestVersion: 0
+      observedGeneration: 0
+      replicas: 0
+      unavailableReplicas: 0
+      updatedReplicas: 0
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: api
+      name: api
+    spec:
+      nodeSelector: null
+      output:
+        to:
+          kind: ImageStreamTag
+          name: api:latest
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        contextDir: /api
+        git:
+          ref: master
+          uri: https://github.com/Cognosante/map-demo
+        type: Git
+      strategy:
+        sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            name: python:3.6
+            namespace: openshift
+        type: Source
+      triggers:
+        - generic:
+            secret: 859d6cb9ebb1ca95
+          type: Generic
+        - imageChange: {}
+          type: ImageChange
+    status:
+      lastVersion: 0
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: frontend
+      name: frontend
+    spec:
+      nodeSelector: null
+      output:
+        to:
+          kind: ImageStreamTag
+          name: frontend:latest
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        contextDir: /web_frontend
+        git:
+          ref: master
+          uri: https://github.com/Cognosante/map-demo
+        type: Git
+      strategy:
+        sourceStrategy:
+          env:
+            - name: DEV_MODE
+              value: 'true'
+          from:
+            kind: ImageStreamTag
+            name: nodejs:8
+            namespace: openshift
+        type: Source
+      triggers:
+        - imageChange: {}
+          type: ImageChange
+        - generic:
+            secret: cb3102a62167cac3
+          type: Generic
+    status:
+      lastVersion: 0
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: hash
+      name: hash
+    spec:
+      nodeSelector: null
+      output:
+        to:
+          kind: ImageStreamTag
+          name: hash:latest
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        contextDir: /hash_service
+        git:
+          ref: master
+          uri: https://github.com/Cognosante/map-demo
+        type: Git
+      strategy:
+        sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            name: ruby:2.4
+            namespace: openshift
+        type: Source
+      triggers:
+        - generic:
+            secret: 80191412cfcc48d4
+          type: Generic
+        - imageChange: {}
+          type: ImageChange
+        - type: ConfigChange
+    status:
+      lastVersion: 0
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      name: rng
+    spec:
+      nodeSelector: null
+      output:
+        to:
+          kind: ImageStreamTag
+          name: rng:latest
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        contextDir: /rng_service
+        git:
+          ref: master
+          uri: https://github.com/Cognosante/map-demo
+        type: Git
+      strategy:
+        sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            name: python:3.6
+            namespace: openshift
+        type: Source
+      triggers:
+        - imageChange: {}
+          type: ImageChange
+        - type: ConfigChange
+        - generic:
+            secret: ed8410395e7f387d
+          type: Generic
+    status:
+      lastVersion: 0
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 1
+      labels:
+        app: api
+      name: api
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - annotations: null
+          from:
+            kind: DockerImage
+            name: docker-registry.default.svc:5000/macm/api:latest
+          generation: null
+          importPolicy: {}
+          name: latest
+          referencePolicy:
+            type: ''
+    status:
+      dockerImageRepository: ''
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 1
+      labels:
+        app: frontend
+      name: frontend
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - annotations: null
+          from:
+            kind: DockerImage
+            name: docker-registry.default.svc:5000/macm/frontend:latest
+          generation: null
+          importPolicy: {}
+          name: latest
+          referencePolicy:
+            type: ''
+    status:
+      dockerImageRepository: ''
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 1
+      labels:
+        app: hash
+      name: hash
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - annotations: null
+          from:
+            kind: DockerImage
+            name: docker-registry.default.svc:5000/macm/hash:latest
+          generation: null
+          importPolicy: {}
+          name: latest
+          referencePolicy:
+            type: ''
+    status:
+      dockerImageRepository: ''
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      generation: 1
+      name: rng
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - annotations: null
+          from:
+            kind: DockerImage
+            name: docker-registry.default.svc:5000/macm/rng:latest
+          generation: null
+          importPolicy: {}
+          name: latest
+          referencePolicy:
+            type: ''
+    status:
+      dockerImageRepository: ''
+  - apiVersion: v1
+    kind: Route
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: frontend
+      name: frontend
+    spec:
+      host: ui.${DOMAIN}
+      port:
+        targetPort: 8080-tcp
+      to:
+        kind: Service
+        name: frontend
+        weight: 100
+      wildcardPolicy: None
+    status:
+      ingress:
+        - conditions:
+            - lastTransitionTime: 2018-08-27T12:29:24Z
+              status: 'True'
+              type: Admitted
+          host: ui.${DOMAIN}
+          routerName: router
+          wildcardPolicy: None
+  - apiVersion: v1
+    kind: Route
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        app: hash
+      name: hash
+    spec:
+      host: hash.${DOMAIN}
+      port:
+        targetPort: 8080-tcp
+      to:
+        kind: Service
+        name: hash
+        weight: 100
+      wildcardPolicy: None
+    status:
+      ingress:
+        - conditions:
+            - lastTransitionTime: 2018-08-27T12:05:23Z
+              status: 'True'
+              type: Admitted
+          host: hash.${DOMAIN}
+          routerName: router
+          wildcardPolicy: None
+  - apiVersion: v1
+    kind: Route
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      name: rng
+    spec:
+      host: rng.${DOMAIN}
+      port:
+        targetPort: 8080-tcp
+      to:
+        kind: Service
+        name: rng
+        weight: 100
+      wildcardPolicy: None
+    status:
+      ingress:
+        - conditions:
+            - lastTransitionTime: 2018-08-27T11:41:57Z
+              status: 'True'
+              type: Admitted
+          host: rng.${DOMAIN}
+          routerName: router
+          wildcardPolicy: None

@@ -1,0 +1,59 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  creationTimestamp: null
+  generation: 1
+  labels:
+    app: demo
+  name: rng
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    deploymentconfig: rng
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deploymentconfig: rng
+    spec:
+      containers:
+        - env:
+            - name: APP_FILE
+              value: rng_service.py
+          image: docker-registry.default.svc:5000/macm/rng@sha256:0c773627011ef1ac2b6ab73c67c775c0c330bbad1c7cc27e73b34ecd5d24218c
+          imagePullPolicy: Always
+          name: rng
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - rng
+        from:
+          kind: ImageStreamTag
+          name: rng:latest
+          namespace: macm
+      type: ImageChange
+    - type: ConfigChange
