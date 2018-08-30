@@ -9,4 +9,4 @@ bundler install
 # Run additional build steps.
 cat /usr/libexec/s2i/assemble
 echo "Running unit tests ..."
-ruby -I test test/*.rb
+rake test
