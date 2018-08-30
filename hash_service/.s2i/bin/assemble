@@ -5,7 +5,7 @@ set -eo pipefail
 # Execute original assemble script.
 /usr/libexec/s2i/assemble
 # Run additional build steps.
-cat /usr/libexec/s2i/assemble
-bundle install --force --with test,development
+# cat /usr/libexec/s2i/assemble
+gem install minitest --force
 echo "Running unit tests ..."
 rake test
