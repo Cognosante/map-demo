@@ -7,6 +7,6 @@ set -eo pipefail
 # Run additional build steps.
 # cat /usr/libexec/s2i/assemble
 gem install minitest
-gem install rack
+gem install rack-test
 echo "Running unit tests ..."
 rake test
