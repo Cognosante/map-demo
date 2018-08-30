@@ -3,6 +3,9 @@ set -eo pipefail
 # Set environment variables.
 export CI=true
 export DEV_MODE=true
+
+cat /usr/libexec/s2i/assemble
+
 bundler install
 # Execute original assemble script.
 /usr/libexec/s2i/assemble
