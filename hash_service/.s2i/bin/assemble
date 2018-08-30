@@ -6,6 +6,6 @@ set -eo pipefail
 /usr/libexec/s2i/assemble
 # Run additional build steps.
 cat /usr/libexec/s2i/assemble
-bundle install --with test,development
+bundle install --force --with test,development
 echo "Running unit tests ..."
 rake test
