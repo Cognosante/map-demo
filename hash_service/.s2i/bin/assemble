@@ -7,5 +7,6 @@ bundler install
 # Execute original assemble script.
 /usr/libexec/s2i/assemble
 # Run additional build steps.
+cat /usr/libexec/s2i/assemble
 echo "Running unit tests ..."
 ruby -I test test/*.rb
