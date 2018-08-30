@@ -6,5 +6,6 @@ export DEV_MODE=true
 # Execute original assemble script.
 /usr/libexec/s2i/assemble
 # Run additional build steps.
+bundler install
 echo "Running unit tests ..."
 ruby -I test test/*.rb
