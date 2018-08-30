@@ -8,5 +8,7 @@ set -eo pipefail
 # cat /usr/libexec/s2i/assemble
 gem install minitest
 gem install rack-test
+gem install sinatra
+gem install thin
 echo "Running unit tests ..."
 rake test
